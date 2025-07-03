@@ -1,0 +1,19 @@
+<div style="display: flex; justify-content: center;">
+
+    <table>
+        <thead>
+            <th>Name</th>
+            <th>Total time in month</th>
+            <th>Actions</th>
+        </thead>
+        <tbody>
+            <tr *ngFor="let e of sortirani" [ngClass]="{ 'boja': e.UkupnoSati < 100 }">
+                <td> {{ e.EmployeeName }}</td>
+                <td> {{ e.UkupnoSati | number:'1.0-0' }} </td>
+                <td> <a href="/">Edit</a></td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
