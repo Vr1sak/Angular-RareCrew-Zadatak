@@ -22,6 +22,8 @@ export class EmployeeTabela {
   employees: Employee[] = [];
   grupisani: { [name: string]: { EmployeeName: string; UkupnoSati: number } } = {};
   sortirani: { EmployeeName: string; UkupnoSati: number }[] = [];
+  ukupnoSati: number = 0;
+
 
   public pieChartData: ChartData<'pie', number[], string> = {
     labels: [],
@@ -35,9 +37,7 @@ export class EmployeeTabela {
       datalabels: {
         color: '#000',
         formatter: (value, ctx) => {
-          const data = ctx.chart.data.datasets[0].data as number[];
-          const sum = data.reduce((sum, v) => sum + (v as number), 0);
-          const procenat = (value as number) / sum * 100;
+          const procenat = (value as number) / this.ukupnoSati * 100;
           return `${procenat.toFixed(2)}%`;
         }
       }
@@ -51,23 +51,25 @@ export class EmployeeTabela {
     this.http.get<Employee[]>('https://rc-vault-fap-live-1.azurewebsites.net/api/gettimeentries?code=vO17RnE8vuzXzPJo5eaLLjXjmRW07law99QTD90zat9FfOQJKKUcgQ==').subscribe(res => {
     this.employees = res
   
-   this.employees.forEach(e => {
-    if (!this.grupisani[e.EmployeeName]) {
-      this.grupisani[e.EmployeeName] = {
-        EmployeeName: e.EmployeeName,
-        UkupnoSati: 0
-      };
-    }
+    this.employees.forEach(e => {
+      if (!this.grupisani[e.EmployeeName]) {
+        this.grupisani[e.EmployeeName] = {
+          EmployeeName: e.EmployeeName,
+          UkupnoSati: 0
+        };
+      }
     this.grupisani[e.EmployeeName].UkupnoSati += this.izracunajSate(e);
   });
 
     this.sortirani = Object.values(this.grupisani);
 
     this.sortirani = this.sortirani.sort((a, b) => b.UkupnoSati - a.UkupnoSati);
+    this.ukupnoSati = this.sortirani.reduce((sum, e) => sum + e.UkupnoSati, 0);
+    var sortiraniBezNull = this.sortirani.filter(x => x.EmployeeName);
 
     this.pieChartData = {
-          labels: this.sortirani.map(x => x.EmployeeName),
-          datasets: [{ data: this.sortirani.map(x => +x.UkupnoSati) }]
+          labels: sortiraniBezNull.map(x => x.EmployeeName),
+          datasets: [{ data: sortiraniBezNull.map(x => +x.UkupnoSati) }]
         };
   });  
 
